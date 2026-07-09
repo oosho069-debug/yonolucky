@@ -1,0 +1,59 @@
+
+
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  password  String
+  balance   Float    @default(0.0)
+  role      String   @default("USER")
+  isBlocked Boolean  @default(false)
+  createdAt DateTime @default(now())
+  bets      Bet[]
+  transactions Transaction[]
+}
+
+model GameHistory {
+  id           Int      @id @default(autoincrement())
+  period       String   @unique
+  resultNumber Int
+  resultColor  String
+  gameType     String   @default("WINGO_1MIN")
+  createdAt    DateTime @default(now())
+}
+
+model Bet {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  period     String
+  amount     Float
+  selection  String
+  gameType   String   @default("WINGO_1MIN")
+  status     String   @default("PENDING")
+  winAmount  Float    @default(0.0)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  type       String
+  amount     Float
+  status     String   @default("PENDING")
+  method     String
+  details    String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+}
+```
+
