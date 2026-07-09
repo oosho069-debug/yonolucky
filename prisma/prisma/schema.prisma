@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  phone     String   @unique
+  password  String
+  balance   Float    @default(0.0)
+  role      String   @default("USER") // USER, ADMIN
+  isBlocked Boolean  @default(false)
+  createdAt DateTime @default(now())
+  bets      Bet[]
+  transactions Transaction[]
+}
+
+model GameHistory {
+  id           Int      @id @default(autoincrement())
+  period       String   @unique
+  resultNumber Int
+  resultColor  String
+  gameType     String   @default("WINGO_1MIN")
+  createdAt    DateTime @default(now())
+}
+
+model Bet {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  period     String
+  amount     Float
+  selection  String   // e.g., "GREEN", "RED", "BIG", "SMALL", "1", "2"
+  gameType   String   @default("WINGO_1MIN") // WINGO_1MIN, WINGO_3MIN, WINGO_5MIN, WINGO_10MIN, SLOTS, AVIATOR
+  status     String   @default("PENDING") // PENDING, WON, LOST
+  winAmount  Float    @default(0.0)
+  createdAt  DateTime @default(now())
+  
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  type       String   // DEPOSIT, WITHDRAW
+  amount     Float
+  status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  method     String   // UPI, BANK
+  details    String   // UPI ID or Bank Account No
+  createdAt  DateTime @default(now())
+  
+  user       User     @relation(fields: [userId], references: [id])
+}
