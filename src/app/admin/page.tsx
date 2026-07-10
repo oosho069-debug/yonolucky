@@ -244,6 +244,7 @@ function LiveBetsTab() {
 function GameControlTab() {
   const [timers, setTimers] = useState<any>({});
   const [socket, setSocket] = useState<any>(null);
+  const [aviatorCrashPoint, setAviatorCrashPoint] = useState("1.00");
 
   useEffect(() => {
     const newSocket = io();
@@ -265,8 +266,33 @@ function GameControlTab() {
     }
   };
 
+  const handleForceAviator = () => {
+    if (socket && !isNaN(Number(aviatorCrashPoint))) {
+      socket.emit("force_result", { gameType: "AVIATOR", multiplier: parseFloat(aviatorCrashPoint) });
+      alert(`Forced Next Aviator Crash to ${aviatorCrashPoint}x!`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
+      {/* Aviator Control */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-red-900 text-white p-3 font-bold flex justify-between items-center">
+          <span>✈️ AVIATOR (Next Round)</span>
+        </div>
+        <div className="p-4 flex gap-2">
+          <input 
+            type="number" 
+            step="0.01" 
+            value={aviatorCrashPoint} 
+            onChange={e => setAviatorCrashPoint(e.target.value)} 
+            className="border p-2 rounded-lg flex-1 font-bold text-gray-800"
+            placeholder="e.g. 1.00 or 5.50"
+          />
+          <button onClick={handleForceAviator} className="bg-red-600 text-white font-bold px-6 rounded-lg shadow-md hover:bg-red-500">FORCE CRASH</button>
+        </div>
+      </div>
+
       {["WINGO_1MIN", "WINGO_3MIN", "WINGO_5MIN", "WINGO_10MIN"].map(gameType => {
         const t = timers[gameType] || { timeRemaining: 0, currentPeriod: "Loading..." };
         return (
